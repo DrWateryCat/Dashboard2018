@@ -154,6 +154,10 @@ NetworkTables.addKeyListener('/SmartDashboard/autonomous/selected', (key, value)
     ui.autoSelect.value = value;
 });
 
+NetworkTables.addKeyListener('/SmartDashboard/position/selected', (key, value) => {
+    ui.posSelect.value = value;
+})
+
 // Listen for a theme change
 NetworkTables.addKeyListener('/SmartDashboard/theme', (key, value) => {
     console.log("Changing theme to " + value);

@@ -12,13 +12,16 @@ function createWindow() {
         server = require('child_process').spawn('python3', ['-m', 'pynetworktables2js']);
     }
 
+    console.log(__dirname);
+
     mainWindow = new BrowserWindow({
         width: 1366,
         height: 570,
         show: false,
         webPreferences: {
             allowRunningInsecureContent: true
-        }
+        },
+        icon: __dirname + '/favicon.ico'
     });
 
     mainWindow.setPosition(0, 0);

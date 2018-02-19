@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>FRC Dashboard</title>
+    <link href="css/style.css" rel="stylesheet">
+    <link id="theme-link" rel="stylesheet" href="css/Dark.css">
+    <script src="jquery.js"></script>
+</head>
+
+<body>
+    <div id="timer">2:15</div>
+    <header>
+        <!-- Tells whether robot is connected to dashboard. -->
+        <span id="robot-state">Unknown state</span>
+        <button id="tuning-button">Tuning</button>
+    </header>
+    <!-- You'll need to mess around with the CSS of #camera (found in css/style.css) to get it to work.
+        More explanation in that CSS rule. -->
+    <div id="camera"></div>
+    <div id="tuning" style="display: none;">
+        <input type="text" placeholder="Property" id="key">
+        <input type="text" placeholder="Value" id="value">
+        <button id="set">Set</button>
+        <button id="get">Get</button>
+    </div>
+    <!-- The main body of the dashboard, by default contains the gyro monitor and the robot diagram -->
+    <article>
+        <!-- Gyroscope -->
+        <svg id="gyro">
+            <circle cx="85" cy="85" r="83"></circle>
+            <circle cx="85" cy="85" r="50"></circle>
+            <rect id="gyro-arm" x="80" y="5" width="10" height="80"></rect>
+            <text id="gyro-number" x="90" y="115">0º</text>
+        </svg>
+
+        <!-- Robot Diagram with a flippy arm and everything -->
+        <svg id="robot-diagram" width="332" height="450">
+            <text x="40" y="340" text-anchor="middle">Chad</text>
+            <rect x="75" y="360" width="230" height="40"></rect>
+            <rect x="85" y="370" width="210" height="40"></rect>
+            <rect id="flipper" x="5" y="375" width="80" height="10" style="transform:rotate(180deg)"></rect>
+            <circle cx="100" cy="410" r="25"></circle>
+            <circle cx="260" cy="410" r="25"></circle>
+            <rect x="60" y="380" width="250" height="30"></rect>
+            <text id="team" x="185" y="405" text-anchor="middle">2186</text>
+        </svg>
+    </article>
+    <!-- The sidebar of the dashboard. Designed for smaller control elements like selection boxes and small buttons. -->
+    <aside>
+        <!-- Autonomous selector -->
+        <p>Autonomous Mode:</p>
+        <div class="select-container">
+            <select id="auto-select">
+                <option>No auto modes found</option>
+                <!-- This gets populated by JS -->
+            </select>
+        </div>
+
+        <p>Robot Position:</p>
+        <div class="select-container">
+            <select id="pos-select">
+                <option>Left</option>
+                <option>Middle</option>
+                <option>Right</option>
+            </select>
+        </div>
+
+        <p>Theme:</p>
+        <div class="select-container">
+            <select id="theme-select">
+                <option>Dark</option>
+                <option>Red</option>
+                <option>Blue</option>
+                <option>LGBT</option>
+            </select>
+        </div>
+
+        <p>X: <span id="x-coord">0</span></p>
+        <p>Y: <span id="y-coord">0</span></p>
+    </aside>
+    <script src="/networktables/networktables.js"></script>
+    <script src="ui.js"></script>
+</body>
+
+</html>

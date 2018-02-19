@@ -51,6 +51,7 @@ It is recommended that while using the dashboard on your driver station, you clo
 * [Leon Tan](https://github.com/lleontan) led the original 1418 UI team, coded pynetworktables2js, and developed a browser-based UI which was years later reworked to create FRC Dashboard.
 * [Dustin Spicuzza](https://github.com/virtuald) leads the [RobotPy](https://github.com/robotpy) project mentored team 1418 through much of FRC Dashboard's genesis.
 * [Tomas Rakusan](https://github.com/rakusan2) Developed Node based [NetworkTables client](https://github.com/rakusan2/FRC-NT-Client) and its interface in this project
+* [Kenny Raisbeck](https://github.com/drwaterycat) Used and transformed this fork to use the old [pynetworktables2js](https://github.com/robotpy/pynetworktables2js) server.
 
 ## Licensing
 This software is available under the [MIT License](`LICENSE`).

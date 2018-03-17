@@ -35,6 +35,19 @@
             <text id="gyro-number" x="90" y="115">0º</text>
         </svg>
 
+        <p>LED Animation</p>
+        <div class="select-container">
+            <select id="led-select">
+                <option>Off</option>
+                <option>Manual</option>
+                <option>Rainbow</option>
+                <option>Rainbow Cycle</option>
+            </select>
+        </div>
+        <input id="red-bar" type="range" min="0" max="255">
+        <input id="green-bar" type="range" min="0" max="255">
+        <input id="blue-bar" type="range" min="0" max="255">
+
         <!-- Robot Diagram with a flippy arm and everything -->
         <svg id="robot-diagram" width="332" height="450">
             <text x="40" y="340" text-anchor="middle">Chad</text>
@@ -58,6 +71,13 @@
             </select>
         </div>
 
+        <p>Path:</p>
+        <div class="select-container">
+            <select id="path-select">
+                <option>No paths!</option>
+            </select>
+        </div>
+
         <p>Robot Position:</p>
         <div class="select-container">
             <select id="pos-select">
@@ -77,8 +97,10 @@
             </select>
         </div>
 
-        <p>X: <span id="x-coord">0</span></p>
-        <p>Y: <span id="y-coord">0</span></p>
+        <p>Left Position <span id="x-coord">0</span></p>
+        <p>Left Velocity <span id="y-coord">0</span></p>
+        <p>Right Position <span id="right-pos">0</span></p>
+        <p>Right Velocity <span id="right-vel">0</span></p>
     </aside>
     <script src="/networktables/networktables.js"></script>
     <script src="ui.js"></script>

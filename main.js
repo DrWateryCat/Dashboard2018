@@ -7,7 +7,7 @@ let server;
 
 function createWindow() {
     if (process.platform === 'win32') {
-        server = require('child_process').spawn('py', ['-3', '-m', 'pynetworktables2js']);
+        server = require('child_process').spawn('py', ['-3', '-m', 'pynetworktables2js', '--robot', '10.21.86.2']);
     } else {
         server = require('child_process').spawn('python3', ['-m', 'pynetworktables2js']);
     }

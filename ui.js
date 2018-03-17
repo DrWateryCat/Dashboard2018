@@ -1,3 +1,5 @@
+const udp = require('dgram');
+
 let ui = {
     timer: document.getElementById('timer'),
     robotState: document.getElementById('robot-state'),
@@ -11,11 +13,14 @@ let ui = {
     },
     autoSelect: document.getElementById('auto-select'),
     posSelect: document.getElementById('pos-select'),
+    pathSelect: document.getElementById('path-select'),
     robotDiagram: {
         arm: document.getElementById('flipper')
     },
     xCoord: document.getElementById('x-coord'),
     yCoord: document.getElementById('y-coord'),
+    rightPos: document.getElementById('right-pos'),
+    rightVel: document.getElementById('right-vel'),
     theme: {
         select: document.getElementById('theme-select'),
         link: document.getElementById('theme-link')
@@ -27,6 +32,12 @@ let ui = {
         value: document.getElementById('value'),
         set: document.getElementById('set'),
         get: document.getElementById('get')
+    },
+    lights: {
+        led_select: document.getElementById('led-select'),
+        red: document.getElementById('red-bar'),
+        green: document.getElementById('green-bar'),
+        blue: document.getElementById('blue-bar')
     }
 };
 
@@ -48,7 +59,7 @@ NetworkTables.addGlobalListener((key, value, isNew) => {
     console.log(propName);
     let oldInput = document.getElementsByName(propName)[0]
     if (isNew === true && !oldInput) {
-        if (key.substring(0, 16) === "/SmartDashboard/") {
+        if (key.substring(0, 16) === "/SmartDashboard/" || key.substring(0, 7) === "/drive/") {
             let div = document.createElement('div');
             ui.tuning.list.appendChild(div);
             let p = document.createElement('p');
@@ -100,7 +111,7 @@ let updateGyro = (key, value) => {
     ui.gyro.val = value;
     ui.gyro.visualVal = Math.floor(ui.gyro.val - ui.gyro.offset);
     ui.gyro.visualVal %= 360;
-    if (ui.gyro.visualVal < 360) {
+    if (ui.gyro.visualVal < 0) {
         ui.gyro.visualVal += 360;
     }
 
@@ -108,7 +119,7 @@ let updateGyro = (key, value) => {
     ui.gyro.number.innerHTML = ui.gyro.visualVal;
 };
 
-NetworkTables.addKeyListener('/drive/gyro', updateGyro);
+NetworkTables.addKeyListener('/drive/heading', updateGyro);
 
 NetworkTables.addKeyListener('/robot/time', (key, value) => {
     // This is an example of how a dashboard could display the remaining time in a match.
@@ -116,12 +127,20 @@ NetworkTables.addKeyListener('/robot/time', (key, value) => {
     ui.timer.innerHTML = value < 0 ? '0:00' : Math.floor(value / 60) + ':' + (value % 60 < 10 ? '0' : '') + value % 60;
 });
 
-NetworkTables.addKeyListener('/drive/x_coord', (key, value) => {
+NetworkTables.addKeyListener('/drive/left_position', (key, value) => {
     ui.xCoord.innerHTML = value.toString();
 });
 
-NetworkTables.addKeyListener('/drive/y_coord', (key, value) => {
+NetworkTables.addKeyListener('/drive/left_velocity', (key, value) => {
     ui.yCoord.innerHTML = value.toString();
+});
+
+NetworkTables.addKeyListener('/drive/right_position', (key, value) => {
+    ui.rightPos.innerHTML = value.toString();
+});
+
+NetworkTables.addKeyListener('/drive/right_velocity', (key, value) => {
+    ui.rightVel.innerHTML = value.toString();
 });
 
 NetworkTables.addKeyListener('/platform/barUp', (key, value) => {
@@ -131,7 +150,7 @@ NetworkTables.addKeyListener('/platform/barUp', (key, value) => {
     }
 
     ui.robotDiagram.arm.style.transform = `rotate(${armAngle}deg)`;
-})
+});
 
 // Load list of prewritten autonomous modes
 NetworkTables.addKeyListener('/SmartDashboard/autonomous/options', (key, value) => {
@@ -149,6 +168,20 @@ NetworkTables.addKeyListener('/SmartDashboard/autonomous/options', (key, value) 
     ui.autoSelect.value = NetworkTables.getValue('/SmartDashboard/current_mode');
 });
 
+NetworkTables.addKeyListener('/SmartDashboard/paths/options', (key, value) => {
+    while (ui.pathSelect.firstChild) {
+        ui.pathSelect.removeChild(ui.pathSelect.firstChild);
+    }
+
+    for (let i = 0; i < value.length; i++) {
+        let option = document.createElement('option');
+        option.appendChild(document.createTextNode(value[i]));
+        ui.pathSelect.appendChild(option);
+    }
+
+    ui.pathSelect.value = NetworkTables.getValue('SmartDashboard/paths/selected');
+});
+
 // Load list of prewritten autonomous modes
 NetworkTables.addKeyListener('/SmartDashboard/autonomous/selected', (key, value) => {
     ui.autoSelect.value = value;
@@ -156,7 +189,11 @@ NetworkTables.addKeyListener('/SmartDashboard/autonomous/selected', (key, value)
 
 NetworkTables.addKeyListener('/SmartDashboard/position/selected', (key, value) => {
     ui.posSelect.value = value;
-})
+});
+
+NetworkTables.addKeyListener('/SmartDashboard/paths/selected', (key, value) => {
+    ui.pathSelect.value = value;
+});
 
 // Listen for a theme change
 NetworkTables.addKeyListener('/SmartDashboard/theme', (key, value) => {
@@ -179,7 +216,12 @@ ui.autoSelect.onchange = function() {
 // Update the robot when we choose the starting position
 ui.posSelect.onchange = () => {
     NetworkTables.setValue('SmartDashboard/position/selected', ui.posSelect.value);
-}
+};
+
+ui.pathSelect.onchange = () => {
+    NetworkTables.setValue('SmartDashboard/paths/selected', ui.pathSelect.value);
+};
+
 // When the theme is changed, update it
 ui.theme.select.onclick = () => {
     NetworkTables.setValue('SmartDashboard/theme', ui.theme.select.value);
@@ -195,10 +237,53 @@ ui.tuning.button.onclick = () => {
 
 ui.tuning.get.onclick = () => {
     ui.tuning.value.value = NetworkTables.getValue(ui.tuning.key.value);
-}
+};
 
 ui.tuning.set.onclick = () => {
     if (ui.tuning.key.value && ui.tuning.value.value) {
         NetworkTables.setValue('SmartDashboard/' + ui.tuning.key.value, ui.tuning.value.value);
     }
+};
+
+ui.lights.led_select.onchange = () => {
+    if (ui.lights.led_select.value !== "Manual") {
+        ui.lights.red.hidden = true;
+        ui.lights.green.hidden = true;
+        ui.lights.blue.hidden = true;
+    } else {
+        ui.lights.red.hidden = false;
+        ui.lights.blue.hidden = false;
+        ui.lights.green.hidden = false;
+    }
+    let anim = 0;
+    if (ui.lights.led_select.value === "Manual") {
+        anim = 1;
+    } else if (ui.lights.led_select.value === "Rainbow") {
+        anim = 2;
+    } else if (ui.lights.led_select.value === "Rainbow Cycle") {
+        anim = 3;
+    }
+    sendToPi("animation", anim);
+};
+
+function sendToPi(k, v) {
+    let sock = udp.createSocket('udp4');
+    let data = {
+        key: k,
+        value: v
+    }
+
+    sock.send(JSON.stringify(data), 42069, '10.21.86.208');
+};
+
+ui.lights.red.ondragend = () => {
+    sendToPi("red", ui.lights.red.value)
+};
+
+ui.lights.green.ondragend = () => {
+    sendToPi("green", ui.lights.green.value);
+};
+
+ui.lights.blue.ondragend = () => {
+    sendToPi("blue", ui.lights.blue.value);
 };
